@@ -1,35 +1,44 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import Logo from './Logo';
+import { Phone, Mail, MapPin, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-card border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="relative bg-card/50 border-t border-white/5 overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px]" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px]" />
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-                <span className="font-heading font-bold text-lg text-white">BL</span>
-              </div>
-              <span className="font-heading font-semibold text-xl text-white">Build Launch</span>
-            </Link>
-            <p className="text-muted-foreground text-sm max-w-md mb-4">
+            <Logo size="default" />
+            <p className="text-muted-foreground text-sm max-w-md mt-4 leading-relaxed">
               The trusted renovation marketplace for homeowners in Mississauga, Toronto, and Brampton. 
               Connect with verified contractors through our secure escrow payment system.
             </p>
-            <div className="flex flex-col gap-2">
-              <a href="tel:416-697-1728" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors" data-testid="footer-phone">
-                <Phone className="w-4 h-4" />
-                <span className="font-mono">416-697-1728</span>
+            <div className="flex flex-col gap-3 mt-6">
+              <a href="tel:416-697-1728" className="flex items-center gap-3 text-white hover:text-cyan-400 transition-colors group" data-testid="footer-phone">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-colors">
+                  <Phone className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <span className="font-mono text-lg font-medium">416-697-1728</span>
+                  <p className="text-xs text-muted-foreground">Call us anytime</p>
+                </div>
               </a>
-              <a href="mailto:info@buildlaunch.ca" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                <Mail className="w-4 h-4" />
+              <a href="mailto:info@buildlaunch.ca" className="flex items-center gap-3 text-muted-foreground hover:text-white transition-colors group">
+                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
                 <span>info@buildlaunch.ca</span>
               </a>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                  <MapPin className="w-5 h-5" />
+                </div>
                 <span>Serving GTA: Mississauga, Toronto, Brampton</span>
               </div>
             </div>
@@ -37,54 +46,53 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-heading font-semibold text-white mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/browse-jobs" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Browse Jobs
-                </Link>
-              </li>
-              <li>
-                <Link to="/register" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Post a Job
-                </Link>
-              </li>
-              <li>
-                <Link to="/register" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Become a Contractor
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Contact Us
-                </Link>
-              </li>
+            <h4 className="font-heading font-semibold text-white mb-6">Quick Links</h4>
+            <ul className="space-y-3">
+              {[
+                { label: 'Browse Jobs', to: '/browse-jobs' },
+                { label: 'Post a Job', to: '/register' },
+                { label: 'Become a Contractor', to: '/register' },
+                { label: 'Contact Us', to: '/contact' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link 
+                    to={link.to} 
+                    className="text-muted-foreground hover:text-white transition-colors text-sm flex items-center gap-1 group"
+                  >
+                    {link.label}
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all" />
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Services */}
           <div>
-            <h4 className="font-heading font-semibold text-white mb-4">Services</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Kitchen Renovation</li>
-              <li>Bathroom Renovation</li>
-              <li>Basement Finishing</li>
-              <li>General Contracting</li>
+            <h4 className="font-heading font-semibold text-white mb-6">Services</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="hover:text-white transition-colors cursor-default">Kitchen Renovation</li>
+              <li className="hover:text-white transition-colors cursor-default">Bathroom Renovation</li>
+              <li className="hover:text-white transition-colors cursor-default">Basement Finishing</li>
+              <li className="hover:text-white transition-colors cursor-default">General Contracting</li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} Build Launch. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Secure Escrow Payments</span>
-            <span className="text-primary">•</span>
-            <span>10% Platform Fee</span>
-            <span className="text-primary">•</span>
-            <span>Free for Contractors to Bid</span>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Secure Escrow</span>
+            </div>
+            <span className="text-white/20">|</span>
+            <span className="text-muted-foreground">10% Platform Fee</span>
+            <span className="text-white/20">|</span>
+            <span className="text-cyan-400">Free to Bid</span>
           </div>
         </div>
       </div>
