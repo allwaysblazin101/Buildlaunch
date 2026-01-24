@@ -98,10 +98,13 @@ const ProtectedRoute = ({ children, userType }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={userType === 'admin' ? '/admin-login' : '/login'} replace />;
   }
 
   if (userType && user.user_type !== userType) {
+    if (user.user_type === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to={user.user_type === 'homeowner' ? '/dashboard' : '/contractor-dashboard'} replace />;
   }
 
