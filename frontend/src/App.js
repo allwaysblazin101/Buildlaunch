@@ -157,6 +157,14 @@ function App() {
                 <Messages />
               </ProtectedRoute>
             } />
+
+            {/* Admin Routes */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin" element={
+              <ProtectedRoute userType="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
           </Routes>
           <Toaster position="top-right" richColors />
         </div>
