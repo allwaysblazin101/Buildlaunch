@@ -198,6 +198,75 @@ const JobDetails = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Photo Gallery */}
+                {job.images && job.images.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="font-heading font-semibold text-white flex items-center gap-2">
+                      <Image className="w-4 h-4" />
+                      Project Photos
+                    </h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {job.images.map((img, index) => (
+                        <Dialog key={index} open={imageModalOpen && selectedImageIndex === index} onOpenChange={(open) => {
+                          setImageModalOpen(open);
+                          if (open) setSelectedImageIndex(index);
+                        }}>
+                          <DialogTrigger asChild>
+                            <div 
+                              className="aspect-square rounded-lg overflow-hidden cursor-pointer group"
+                              data-testid={`job-image-${index}`}
+                            >
+                              <img 
+                                src={img}
+                                alt={`Project ${index + 1}`}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                              />
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl bg-card border-white/10 p-2">
+                            <div className="relative">
+                              <img 
+                                src={img.replace('w=400', 'w=1200')}
+                                alt={`Project ${index + 1}`}
+                                className="w-full rounded-lg"
+                              />
+                              {job.images.length > 1 && (
+                                <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="bg-black/50 hover:bg-black/70 rounded-full"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedImageIndex((prev) => (prev - 1 + job.images.length) % job.images.length);
+                                    }}
+                                  >
+                                    <ChevronLeft className="w-6 h-6" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="bg-black/50 hover:bg-black/70 rounded-full"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedImageIndex((prev) => (prev + 1) % job.images.length);
+                                    }}
+                                  >
+                                    <ChevronRight className="w-6 h-6" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-center text-sm text-muted-foreground mt-2">
+                              {selectedImageIndex + 1} of {job.images.length}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="font-heading font-semibold text-white mb-2">Description</h3>
                   <p className="text-muted-foreground whitespace-pre-wrap" data-testid="job-description">
@@ -206,11 +275,11 @@ const JobDetails = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-background rounded-md p-4 border border-white/10">
+                  <div className="bg-background rounded-lg p-4 border border-white/10">
                     <p className="text-sm text-muted-foreground mb-1">Category</p>
                     <p className="font-medium text-white">{job.category}</p>
                   </div>
-                  <div className="bg-background rounded-md p-4 border border-white/10">
+                  <div className="bg-background rounded-lg p-4 border border-white/10">
                     <p className="text-sm text-muted-foreground mb-1">Budget</p>
                     <p className="font-medium text-white" data-testid="job-budget">
                       ${job.budget_min.toLocaleString()} - ${job.budget_max.toLocaleString()} CAD
