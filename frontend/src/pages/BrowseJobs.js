@@ -110,30 +110,30 @@ const BrowseJobs = () => {
                 />
               </div>
               <Select
-                value={filters.location}
-                onValueChange={(value) => setFilters({ ...filters, location: value })}
+                value={filters.location || "all"}
+                onValueChange={(value) => setFilters({ ...filters, location: value === "all" ? "" : value })}
               >
                 <SelectTrigger className="w-full md:w-48 bg-background border-input" data-testid="location-filter">
                   <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  <SelectItem value="all">All Locations</SelectItem>
                   {locations.map((loc) => (
                     <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select
-                value={filters.category}
-                onValueChange={(value) => setFilters({ ...filters, category: value })}
+                value={filters.category || "all"}
+                onValueChange={(value) => setFilters({ ...filters, category: value === "all" ? "" : value })}
               >
                 <SelectTrigger className="w-full md:w-48 bg-background border-input" data-testid="category-filter">
                   <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
