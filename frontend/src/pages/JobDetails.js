@@ -28,6 +28,8 @@ const JobDetails = () => {
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [bidForm, setBidForm] = useState({
     amount: '',
     message: '',
