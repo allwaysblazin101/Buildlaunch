@@ -5,11 +5,14 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import re
+import hashlib
 from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, validator
 from typing import List, Optional, Dict
 import uuid
 from datetime import datetime, timezone, timedelta
+from collections import defaultdict
 import jwt
 import bcrypt
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
@@ -30,6 +33,15 @@ JWT_EXPIRATION_HOURS = 24
 # Stripe Config
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
 PLATFORM_FEE_PERCENT = 10
+
+# Admin Config
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@buildlaunch.ca')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'BuildLaunch2024!')
+
+# Rate Limiting (in-memory for simplicity)
+login_attempts = defaultdict(list)
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_DURATION = 300  # 5 minutes
 
 # Create the main app
 app = FastAPI(title="Build Launch API")
