@@ -1,0 +1,150 @@
+{
+  "brand_identity": {
+    "name": "Build Launch",
+    "mission": "The precision marketplace for renovation jobs in the GTA.",
+    "vibe": "Industrial Tech, Professional, Trustworthy, High-Precision",
+    "archetype": "The Architect (Structure, Vision, Clarity)",
+    "target_audience": "Homeowners in Toronto/Mississauga/Brampton & Licensed Contractors"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Space Grotesk, sans-serif",
+      "weights": ["600", "700"],
+      "usage": "All section headers, hero titles, and major calls to action. Use tight tracking (-0.02em).",
+      "fallback": "system-ui"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Paragraphs, UI labels, inputs, and data tables.",
+      "fallback": "sans-serif"
+    },
+    "mono": {
+      "font_family": "JetBrains Mono, monospace",
+      "usage": "License numbers, transaction IDs, code snippets, and technical data."
+    }
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": {
+        "default": "#0A0A0A",
+        "paper": "#121212",
+        "subtle": "#18181B"
+      },
+      "primary": {
+        "main": "#2563EB",
+        "light": "#60A5FA",
+        "dark": "#1D4ED8",
+        "foreground": "#FFFFFF"
+      },
+      "secondary": {
+        "main": "#F97316",
+        "light": "#FB923C",
+        "dark": "#EA580C",
+        "foreground": "#FFFFFF"
+      },
+      "neutral": {
+        "50": "#FAFAFA",
+        "100": "#F4F4F5",
+        "200": "#E4E4E7",
+        "300": "#D4D4D8",
+        "400": "#A1A1AA",
+        "500": "#71717A",
+        "600": "#52525B",
+        "700": "#3F3F46",
+        "800": "#27272A",
+        "900": "#18181B"
+      },
+      "status": {
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+    "gradients": {
+      "hero": "linear-gradient(to right bottom, #0A0A0A, #111111)",
+      "glass": "linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)",
+      "glow": "radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, transparent 70%)"
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "marketing": "Bento Grid (Asymmetric). Use grid-cols-12. Mix col-span-4, col-span-6, col-span-8.",
+      "dashboard": "Dense Grid. Sidebar fixed (w-64), Main content fluid. Cards use h-full."
+    },
+    "spacing": {
+      "container_padding": "px-6 md:px-12 lg:px-24",
+      "section_gap": "py-24 md:py-32",
+      "element_gap": "gap-6"
+    },
+    "border_radius": {
+      "default": "rounded-sm",
+      "card": "rounded-md",
+      "button": "rounded-md"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all duration-300",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+      "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "cards": {
+      "style": "bg-card text-card-foreground border border-border/40 shadow-sm hover:border-primary/50 transition-colors duration-300",
+      "glass": "backdrop-blur-xl bg-black/40 border border-white/10"
+    },
+    "inputs": {
+      "style": "bg-background border-input focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+    },
+    "navigation": {
+      "style": "sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Use subtle noise overlay (opacity 0.03) on dark backgrounds to prevent banding and add tactility.",
+    "shadows": "Use colored shadows for primary actions (e.g., shadow-blue-500/20).",
+    "motion": {
+      "hover": "scale-[1.02] transition-transform duration-200",
+      "entrance": "animate-in fade-in slide-in-from-bottom-4 duration-700",
+      "marquee": "Use react-fast-marquee for 'Trusted Contractors' and 'Recent Jobs' sections."
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1628182087681-b6e7d4a26efd?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "renovation_interior": "https://images.unsplash.com/photo-1762811003338-aef30274513b?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "construction_site": "https://images.pexels.com/photos/7937659/pexels-photo-7937659.jpeg",
+      "contractor_meeting": "https://images.pexels.com/photos/8961295/pexels-photo-8961295.jpeg",
+      "toronto_skyline": "https://images.unsplash.com/photo-1632857997897-9418428d7368?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "tools_detail": "https://images.unsplash.com/photo-1765277789186-04b71a9afd40?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    "icons": "Use Lucide React (default). For specialized construction icons, use Phosphor Icons if needed."
+  },
+  "universal_guidelines": [
+    "Dark Mode is the default and primary experience.",
+    "Use 'Space Grotesk' for all headings to give a technical, precise feel.",
+    "Avoid gradients on text unless it's a very subtle shine effect.",
+    "All cards must have a subtle border (border-white/10) to define edges in dark mode.",
+    "Use 'Manrope' for body text to ensure high legibility.",
+    "Interactive elements must have clear hover states (brightness-110 or subtle lift).",
+    "Forms must be clean, single-column where possible, with clear validation.",
+    "Escrow and Payment sections must look ultra-secure (use lock icons, shield motifs, green/gold accents for money).",
+    "Phone number 416-697-1728 must be visible in the Footer and Contact page."
+  ],
+  "instructions_to_main_agent": {
+    "setup": [
+      "Install 'react-fast-marquee' for the scrolling sections.",
+      "Install '@fontsource/space-grotesk' and '@fontsource/manrope' or add via Google Fonts.",
+      "Ensure Tailwind config extends the color palette with the specific hex codes provided."
+    ],
+    "pages": {
+      "landing": "Hero with Toronto skyline blended with construction blueprints. 'How it Works' section with 3-step Escrow flow. Marquee of 'Recent Jobs in Mississauga...'.",
+      "auth": "Split screen. Left side: High-quality renovation image. Right side: Clean form.",
+      "dashboard_homeowner": "Overview of 'My Projects'. Card for 'Active Escrow'. List of 'Incoming Bids'.",
+      "dashboard_contractor": "Map view or List view of 'Available Jobs'. 'My Earnings' chart. 'Verification Status' badge."
+    }
+  }
+}
