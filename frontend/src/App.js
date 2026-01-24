@@ -16,6 +16,8 @@ import Messages from './pages/Messages';
 import Contact from './pages/Contact';
 import BrowseJobs from './pages/BrowseJobs';
 import PaymentSuccess from './pages/PaymentSuccess';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Context
 const AuthContext = createContext(null);
