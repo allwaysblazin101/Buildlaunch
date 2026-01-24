@@ -52,6 +52,8 @@ const Footer = () => {
                 { label: 'Browse Jobs', to: '/browse-jobs' },
                 { label: 'Post a Job', to: '/register' },
                 { label: 'Become a Contractor', to: '/register' },
+                { label: 'About Us', to: '/about' },
+                { label: 'FAQ', to: '/faq' },
                 { label: 'Contact Us', to: '/contact' },
               ].map((link) => (
                 <li key={link.label}>
