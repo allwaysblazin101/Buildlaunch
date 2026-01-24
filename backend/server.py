@@ -54,12 +54,34 @@ logger = logging.getLogger(__name__)
 
 # ============= Models =============
 
+def validate_password_strength(password: str) -> bool:
+    """Check password meets minimum security requirements"""
+    if len(password) < 8:
+        return False
+    if not re.search(r'[A-Za-z]', password):
+        return False
+    if not re.search(r'\d', password):
+        return False
+    return True
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    user_type: str  # 'homeowner' or 'contractor'
+    user_type: str  # 'homeowner', 'contractor', or 'admin'
     phone: Optional[str] = None
+    
+    @validator('password')
+    def password_strength(cls, v):
+        if not validate_password_strength(v):
+            raise ValueError('Password must be at least 8 characters with letters and numbers')
+        return v
+    
+    @validator('user_type')
+    def valid_user_type(cls, v):
+        if v not in ['homeowner', 'contractor']:
+            raise ValueError('User type must be homeowner or contractor')
+        return v
 
 class ContractorVerification(BaseModel):
     license_number: Optional[str] = None
