@@ -263,6 +263,9 @@ async def register(user_data: UserCreate):
     }
     await db.users.insert_one(user_doc)
     
+    # Log registration
+    logger.info(f"New user registered: {user_data.email} as {user_data.user_type}")
+    
     token = create_token(user_id, user_data.email, user_data.user_type)
     return {
         "token": token,
@@ -278,9 +281,20 @@ async def register(user_data: UserCreate):
 
 @api_router.post("/auth/login")
 async def login(credentials: UserLogin):
+    # Check rate limiting
+    if not check_rate_limit(credentials.email):
+        logger.warning(f"Rate limit exceeded for: {credentials.email}")
+        raise HTTPException(status_code=429, detail="Too many login attempts. Please try again in 5 minutes.")
+    
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user or not verify_password(credentials.password, user["password_hash"]):
+        record_login_attempt(credentials.email)
+        logger.warning(f"Failed login attempt for: {credentials.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Clear rate limit on successful login
+    clear_login_attempts(credentials.email)
+    logger.info(f"User logged in: {credentials.email}")
     
     token = create_token(user["id"], user["email"], user["user_type"])
     return {
@@ -293,6 +307,66 @@ async def login(credentials: UserLogin):
             "phone": user.get("phone"),
             "verified": user.get("verified", False),
             "verification": user.get("verification")
+        }
+    }
+
+@api_router.post("/auth/admin-login")
+async def admin_login(credentials: UserLogin):
+    """Special login endpoint for admin users"""
+    # Check rate limiting
+    if not check_rate_limit(credentials.email):
+        raise HTTPException(status_code=429, detail="Too many login attempts. Please try again in 5 minutes.")
+    
+    # Check if admin credentials match env vars (for initial admin)
+    if credentials.email == ADMIN_EMAIL and credentials.password == ADMIN_PASSWORD:
+        # Create or get admin user
+        admin = await db.users.find_one({"email": ADMIN_EMAIL, "user_type": "admin"}, {"_id": 0})
+        if not admin:
+            admin_id = str(uuid.uuid4())
+            admin_doc = {
+                "id": admin_id,
+                "email": ADMIN_EMAIL,
+                "password_hash": hash_password(ADMIN_PASSWORD),
+                "full_name": "Build Launch Admin",
+                "user_type": "admin",
+                "phone": "416-697-1728",
+                "verified": True,
+                "verification": None,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.users.insert_one(admin_doc)
+            admin = admin_doc
+        
+        clear_login_attempts(credentials.email)
+        logger.info(f"Admin logged in: {credentials.email}")
+        token = create_token(admin["id"], admin["email"], "admin")
+        return {
+            "token": token,
+            "user": {
+                "id": admin["id"],
+                "email": admin["email"],
+                "full_name": admin["full_name"],
+                "user_type": "admin",
+                "verified": True
+            }
+        }
+    
+    # Check database for admin user
+    admin = await db.users.find_one({"email": credentials.email, "user_type": "admin"}, {"_id": 0})
+    if not admin or not verify_password(credentials.password, admin["password_hash"]):
+        record_login_attempt(credentials.email)
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    
+    clear_login_attempts(credentials.email)
+    token = create_token(admin["id"], admin["email"], "admin")
+    return {
+        "token": token,
+        "user": {
+            "id": admin["id"],
+            "email": admin["email"],
+            "full_name": admin["full_name"],
+            "user_type": "admin",
+            "verified": True
         }
     }
 
