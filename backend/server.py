@@ -203,6 +203,24 @@ def create_token(user_id: str, email: str, user_type: str) -> str:
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
+def check_rate_limit(email: str) -> bool:
+    """Check if user is rate limited. Returns True if allowed, False if blocked."""
+    now = datetime.now(timezone.utc).timestamp()
+    # Clean old attempts
+    login_attempts[email] = [t for t in login_attempts[email] if now - t < LOCKOUT_DURATION]
+    # Check if too many attempts
+    if len(login_attempts[email]) >= MAX_LOGIN_ATTEMPTS:
+        return False
+    return True
+
+def record_login_attempt(email: str):
+    """Record a failed login attempt"""
+    login_attempts[email].append(datetime.now(timezone.utc).timestamp())
+
+def clear_login_attempts(email: str):
+    """Clear login attempts after successful login"""
+    login_attempts[email] = []
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
@@ -215,6 +233,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify user is an admin"""
+    user = await get_current_user(credentials)
+    if user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
 
 # ============= Auth Endpoints =============
 
