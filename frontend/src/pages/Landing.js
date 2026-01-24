@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog';
 import { 
   Shield, DollarSign, Users, CheckCircle, ArrowRight, Star, MapPin, 
   Clock, Play, Sparkles, Building2, Hammer, PaintBucket, Wrench,
-  ChevronDown, MousePointer2
+  ChevronDown, MousePointer2, Phone
 } from 'lucide-react';
 
 const Landing = () => {
