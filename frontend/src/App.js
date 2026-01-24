@@ -174,7 +174,15 @@ function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+
+            {/* Info Pages */}
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/about" element={<About />} />
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
+          <FloatingContact />
           <Toaster position="top-right" richColors />
         </div>
       </BrowserRouter>
