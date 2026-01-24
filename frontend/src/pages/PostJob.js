@@ -11,7 +11,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { toast } from 'sonner';
-import { ArrowRight, MapPin, DollarSign, Calendar } from 'lucide-react';
+import { ArrowRight, MapPin, DollarSign, Calendar, ImagePlus, X, Upload } from 'lucide-react';
 
 const PostJob = () => {
   const { token } = useAuth();
@@ -27,7 +27,16 @@ const PostJob = () => {
     budget_min: '',
     budget_max: '',
     start_date: '',
+    images: [],
   });
+
+  // Sample placeholder images for demo
+  const sampleImages = [
+    'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
+    'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=400&q=80',
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80',
+  ];
 
   useEffect(() => {
     fetchOptions();
@@ -46,8 +55,30 @@ const PostJob = () => {
     }
   };
 
+  const handleAddSampleImage = () => {
+    if (formData.images.length < 6) {
+      const availableImages = sampleImages.filter(img => !formData.images.includes(img));
+      if (availableImages.length > 0) {
+        const randomImage = availableImages[Math.floor(Math.random() * availableImages.length)];
+        setFormData({ ...formData, images: [...formData.images, randomImage] });
+      }
+    } else {
+      toast.error('Maximum 6 images allowed');
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: newImages });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.location || !formData.category) {
+      toast.error('Please select location and category');
+      return;
+    }
     
     if (parseFloat(formData.budget_min) > parseFloat(formData.budget_max)) {
       toast.error('Minimum budget cannot be greater than maximum budget');
@@ -117,6 +148,52 @@ const PostJob = () => {
                 />
               </div>
 
+              {/* Photo Gallery */}
+              <div className="space-y-3">
+                <Label>Project Photos (Optional)</Label>
+                <p className="text-sm text-muted-foreground">
+                  Add photos to help contractors understand your project better
+                </p>
+                
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3 mt-3">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                        <img 
+                          src={img} 
+                          alt={`Project ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-2 right-2 w-6 h-6 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {formData.images.length < 6 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddSampleImage}
+                    className="w-full border-dashed border-2 h-20 hover:bg-accent/50"
+                    data-testid="add-image-btn"
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Add Photo ({formData.images.length}/6)
+                      </span>
+                    </div>
+                  </Button>
+                )}
+              </div>
+
               {/* Location & Category */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -124,7 +201,6 @@ const PostJob = () => {
                   <Select
                     value={formData.location}
                     onValueChange={(value) => setFormData({ ...formData, location: value })}
-                    required
                   >
                     <SelectTrigger className="bg-background border-input" data-testid="job-location-select">
                       <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -143,7 +219,6 @@ const PostJob = () => {
                   <Select
                     value={formData.category}
                     onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    required
                   >
                     <SelectTrigger className="bg-background border-input" data-testid="job-category-select">
                       <SelectValue placeholder="Select category" />
@@ -210,19 +285,31 @@ const PostJob = () => {
               </div>
 
               {/* Info Box */}
-              <div className="bg-primary/10 border border-primary/30 rounded-md p-4">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                 <h4 className="font-heading font-semibold text-white mb-2">What happens next?</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Your job will be visible to verified contractors</li>
-                  <li>• Contractors can submit bids for free</li>
-                  <li>• You'll need to fund escrow before accepting a bid</li>
-                  <li>• Build Launch charges 10% platform fee on completion</li>
+                <ul className="text-sm text-muted-foreground space-y-1.5">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    Your job will be visible to verified contractors
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    Contractors can submit bids for free
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    You'll need to fund escrow before accepting a bid
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    Build Launch charges 10% platform fee on completion
+                  </li>
                 </ul>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full glow-blue" 
+                className="w-full glow-blue h-12" 
                 disabled={loading}
                 data-testid="submit-job-btn"
               >
