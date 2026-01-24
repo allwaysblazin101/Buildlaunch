@@ -41,10 +41,18 @@ const Navbar = () => {
               <span>Browse Jobs</span>
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 group-hover:w-full transition-all duration-300" />
             </Link>
+            <Link to="/about" className="text-muted-foreground hover:text-white transition-colors relative group">
+              <span>About</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 group-hover:w-full transition-all duration-300" />
+            </Link>
             <Link to="/contact" className="text-muted-foreground hover:text-white transition-colors relative group">
               <span>Contact</span>
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 group-hover:w-full transition-all duration-300" />
             </Link>
+            <a href="tel:416-697-1728" className="text-cyan-400 hover:text-cyan-300 transition-colors font-mono text-sm flex items-center gap-1" data-testid="nav-phone">
+              <Phone className="w-4 h-4" />
+              416-697-1728
+            </a>
             
             {user ? (
               <div className="flex items-center gap-4">
