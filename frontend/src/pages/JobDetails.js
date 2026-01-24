@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { 
   MapPin, DollarSign, Calendar, User, Clock, 
   CheckCircle, Shield, Send, MessageSquare, Star,
-  AlertCircle, Lock, Unlock
+  AlertCircle, Lock, Unlock, Image, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const JobDetails = () => {
