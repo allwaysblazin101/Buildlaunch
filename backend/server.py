@@ -973,6 +973,189 @@ async def get_categories():
 async def get_locations():
     return {"locations": LOCATIONS}
 
+# ============= Admin Endpoints =============
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(admin: dict = Depends(get_admin_user)):
+    """Get platform-wide statistics for admin dashboard"""
+    total_users = await db.users.count_documents({"user_type": {"$ne": "admin"}})
+    total_homeowners = await db.users.count_documents({"user_type": "homeowner"})
+    total_contractors = await db.users.count_documents({"user_type": "contractor"})
+    verified_contractors = await db.users.count_documents({"user_type": "contractor", "verified": True})
+    
+    total_jobs = await db.jobs.count_documents({})
+    open_jobs = await db.jobs.count_documents({"status": "open"})
+    in_escrow_jobs = await db.jobs.count_documents({"status": "in_escrow"})
+    completed_jobs = await db.jobs.count_documents({"status": "completed"})
+    
+    total_bids = await db.bids.count_documents({})
+    
+    # Revenue calculations
+    revenue_pipeline = [
+        {"$match": {"status": "released"}},
+        {"$group": {"_id": None, "total_escrow": {"$sum": "$escrow_amount"}, "total_fees": {"$sum": "$platform_fee"}}}
+    ]
+    revenue_result = await db.payouts.aggregate(revenue_pipeline).to_list(1)
+    total_revenue = revenue_result[0]["total_fees"] if revenue_result else 0
+    total_escrow = revenue_result[0]["total_escrow"] if revenue_result else 0
+    
+    # Recent activity
+    recent_jobs = await db.jobs.find({}, {"_id": 0}).sort("created_at", -1).limit(5).to_list(5)
+    recent_users = await db.users.find({"user_type": {"$ne": "admin"}}, {"_id": 0, "password_hash": 0}).sort("created_at", -1).limit(5).to_list(5)
+    
+    return {
+        "users": {
+            "total": total_users,
+            "homeowners": total_homeowners,
+            "contractors": total_contractors,
+            "verified_contractors": verified_contractors
+        },
+        "jobs": {
+            "total": total_jobs,
+            "open": open_jobs,
+            "in_escrow": in_escrow_jobs,
+            "completed": completed_jobs
+        },
+        "bids": {
+            "total": total_bids
+        },
+        "revenue": {
+            "total_platform_fees": total_revenue,
+            "total_escrow_processed": total_escrow
+        },
+        "recent_jobs": recent_jobs,
+        "recent_users": recent_users
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users(
+    admin: dict = Depends(get_admin_user),
+    user_type: Optional[str] = None,
+    limit: int = 50,
+    skip: int = 0
+):
+    """Get all users with filtering"""
+    query = {"user_type": {"$ne": "admin"}}
+    if user_type:
+        query["user_type"] = user_type
+    
+    users = await db.users.find(query, {"_id": 0, "password_hash": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.users.count_documents(query)
+    
+    return {"users": users, "total": total}
+
+@api_router.get("/admin/jobs")
+async def get_all_jobs(
+    admin: dict = Depends(get_admin_user),
+    status: Optional[str] = None,
+    limit: int = 50,
+    skip: int = 0
+):
+    """Get all jobs with filtering"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    jobs = await db.jobs.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.jobs.count_documents(query)
+    
+    return {"jobs": jobs, "total": total}
+
+@api_router.get("/admin/payments")
+async def get_all_payments(
+    admin: dict = Depends(get_admin_user),
+    limit: int = 50,
+    skip: int = 0
+):
+    """Get all payment transactions"""
+    transactions = await db.payment_transactions.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    payouts = await db.payouts.find({}, {"_id": 0}).sort("released_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    return {"transactions": transactions, "payouts": payouts}
+
+@api_router.put("/admin/users/{user_id}/verify")
+async def admin_verify_contractor(user_id: str, admin: dict = Depends(get_admin_user)):
+    """Admin can manually verify a contractor"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user["user_type"] != "contractor":
+        raise HTTPException(status_code=400, detail="Can only verify contractors")
+    
+    await db.users.update_one({"id": user_id}, {"$set": {"verified": True}})
+    logger.info(f"Admin verified contractor: {user_id}")
+    return {"message": "Contractor verified successfully"}
+
+@api_router.put("/admin/users/{user_id}/suspend")
+async def admin_suspend_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    """Admin can suspend a user"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    await db.users.update_one({"id": user_id}, {"$set": {"suspended": True}})
+    logger.info(f"Admin suspended user: {user_id}")
+    return {"message": "User suspended successfully"}
+
+@api_router.put("/admin/users/{user_id}/unsuspend")
+async def admin_unsuspend_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    """Admin can unsuspend a user"""
+    await db.users.update_one({"id": user_id}, {"$set": {"suspended": False}})
+    logger.info(f"Admin unsuspended user: {user_id}")
+    return {"message": "User unsuspended successfully"}
+
+@api_router.delete("/admin/jobs/{job_id}")
+async def admin_delete_job(job_id: str, admin: dict = Depends(get_admin_user)):
+    """Admin can delete a job"""
+    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job["status"] in ["in_escrow", "awarded"]:
+        raise HTTPException(status_code=400, detail="Cannot delete job with active escrow. Resolve first.")
+    
+    await db.jobs.delete_one({"id": job_id})
+    await db.bids.delete_many({"job_id": job_id})
+    logger.info(f"Admin deleted job: {job_id}")
+    return {"message": "Job deleted successfully"}
+
+@api_router.post("/admin/jobs/{job_id}/resolve")
+async def admin_resolve_dispute(job_id: str, resolution: dict, admin: dict = Depends(get_admin_user)):
+    """Admin can resolve disputes and release/refund escrow"""
+    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    action = resolution.get("action")  # 'release_to_contractor', 'refund_to_homeowner', 'split'
+    
+    if action == "release_to_contractor" and job["awarded_contractor_id"]:
+        escrow_amount = job.get("escrow_amount", 0)
+        platform_fee = escrow_amount * (PLATFORM_FEE_PERCENT / 100)
+        contractor_payout = escrow_amount - platform_fee
+        
+        payout_doc = {
+            "id": str(uuid.uuid4()),
+            "job_id": job_id,
+            "contractor_id": job["awarded_contractor_id"],
+            "escrow_amount": escrow_amount,
+            "platform_fee": platform_fee,
+            "contractor_payout": contractor_payout,
+            "status": "released",
+            "resolved_by_admin": True,
+            "released_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.payouts.insert_one(payout_doc)
+        await db.jobs.update_one({"id": job_id}, {"$set": {"status": "completed"}})
+        logger.info(f"Admin resolved dispute - released to contractor: {job_id}")
+        return {"message": "Payment released to contractor", "payout": contractor_payout}
+    
+    elif action == "refund_to_homeowner":
+        await db.jobs.update_one({"id": job_id}, {"$set": {"status": "cancelled", "escrow_amount": 0}})
+        logger.info(f"Admin resolved dispute - refunded to homeowner: {job_id}")
+        return {"message": "Refund initiated for homeowner"}
+    
+    raise HTTPException(status_code=400, detail="Invalid resolution action")
+
 # Include router
 app.include_router(api_router)
 
