@@ -18,6 +18,12 @@ import BrowseJobs from './pages/BrowseJobs';
 import PaymentSuccess from './pages/PaymentSuccess';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import FAQ from './pages/FAQ';
+import About from './pages/About';
+import NotFound from './pages/NotFound';
+
+// Components
+import FloatingContact from './components/FloatingContact';
 
 // Context
 const AuthContext = createContext(null);
