@@ -197,17 +197,17 @@ const Landing = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </Button>
             </Link>
-            <Link to="/register">
+            <a href="tel:416-697-1728">
               <Button 
                 size="lg" 
                 variant="outline" 
                 className="text-lg px-10 h-14 border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/30 transition-all duration-300"
-                data-testid="hero-cta-contractor"
+                data-testid="hero-call-btn"
               >
-                <Wrench className="w-5 h-5 mr-2" />
-                Join as Contractor
+                <Phone className="w-5 h-5 mr-2" />
+                416-697-1728
               </Button>
-            </Link>
+            </a>
           </div>
 
           {/* Quick Stats */}
