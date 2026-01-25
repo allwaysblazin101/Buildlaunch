@@ -86,6 +86,15 @@ const Footer = () => {
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} Build Launch. All rights reserved.
           </p>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/terms" className="text-muted-foreground hover:text-white transition-colors" data-testid="footer-terms-link">
+              Terms of Service
+            </Link>
+            <span className="text-white/20">|</span>
+            <Link to="/privacy" className="text-muted-foreground hover:text-white transition-colors" data-testid="footer-privacy-link">
+              Privacy Policy
+            </Link>
+          </div>
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

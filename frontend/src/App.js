@@ -21,6 +21,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import ContractorProfile from './pages/ContractorProfile';
 
 // Components
 import FloatingContact from './components/FloatingContact';
@@ -178,6 +181,9 @@ function App() {
             {/* Info Pages */}
             <Route path="/faq" element={<FAQ />} />
             <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contractors/:contractorId" element={<ContractorProfile />} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
