@@ -247,6 +247,130 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 
+# ============= Email Notification Helpers =============
+
+async def send_email_notification(to_email: str, subject: str, html_content: str):
+    """Send email notification using Resend"""
+    if not RESEND_API_KEY:
+        logger.warning("Resend API key not configured, skipping email")
+        return False
+    
+    try:
+        params = {
+            "from": "Build Launch <notifications@buildlaunch.ca>",
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content
+        }
+        resend.Emails.send(params)
+        logger.info(f"Email sent to {to_email}: {subject}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {e}")
+        return False
+
+async def notify_new_bid(job: dict, bid: dict, contractor_name: str):
+    """Notify homeowner about a new bid on their job"""
+    homeowner = await db.users.find_one({"id": job["homeowner_id"]}, {"_id": 0})
+    if not homeowner:
+        return
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #0ea5e9;">New Bid on Your Job!</h2>
+        <p>Hi {homeowner['full_name']},</p>
+        <p>You received a new bid on your job: <strong>{job['title']}</strong></p>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p><strong>Contractor:</strong> {contractor_name}</p>
+            <p><strong>Bid Amount:</strong> ${bid['amount']:,.2f} CAD</p>
+            <p><strong>Estimated Days:</strong> {bid['estimated_days']} days</p>
+            <p><strong>Message:</strong> {bid['message']}</p>
+        </div>
+        <p>Log in to Build Launch to review this bid and all other offers.</p>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">
+            Build Launch - Renovation Marketplace<br>
+            Phone: 416-697-1728
+        </p>
+    </div>
+    """
+    await send_email_notification(homeowner['email'], f"New Bid on {job['title']}", html)
+
+async def notify_bid_accepted(bid: dict, job: dict):
+    """Notify contractor that their bid was accepted"""
+    contractor = await db.users.find_one({"id": bid["contractor_id"]}, {"_id": 0})
+    if not contractor:
+        return
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981;">Congratulations! Your Bid Was Accepted!</h2>
+        <p>Hi {contractor['full_name']},</p>
+        <p>Great news! Your bid on <strong>{job['title']}</strong> has been accepted.</p>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p><strong>Job:</strong> {job['title']}</p>
+            <p><strong>Location:</strong> {job['location']}</p>
+            <p><strong>Your Bid:</strong> ${bid['amount']:,.2f} CAD</p>
+            <p><strong>Escrow Amount:</strong> ${job.get('escrow_amount', 0):,.2f} CAD (secured)</p>
+        </div>
+        <p>The payment is now secured in escrow. Please contact the homeowner to begin work.</p>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">
+            Build Launch - Renovation Marketplace<br>
+            Phone: 416-697-1728
+        </p>
+    </div>
+    """
+    await send_email_notification(contractor['email'], f"Your Bid Was Accepted - {job['title']}", html)
+
+async def notify_job_completed(job: dict, payout_amount: float):
+    """Notify contractor about job completion and payment release"""
+    contractor = await db.users.find_one({"id": job["awarded_contractor_id"]}, {"_id": 0})
+    if not contractor:
+        return
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981;">Payment Released!</h2>
+        <p>Hi {contractor['full_name']},</p>
+        <p>The job <strong>{job['title']}</strong> has been marked as complete and your payment has been released.</p>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p><strong>Job:</strong> {job['title']}</p>
+            <p><strong>Your Payout:</strong> ${payout_amount:,.2f} CAD</p>
+            <p><strong>Platform Fee (10%):</strong> ${job.get('escrow_amount', 0) * 0.1:,.2f} CAD</p>
+        </div>
+        <p>Thank you for using Build Launch! We hope you'll consider leaving a review.</p>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">
+            Build Launch - Renovation Marketplace<br>
+            Phone: 416-697-1728
+        </p>
+    </div>
+    """
+    await send_email_notification(contractor['email'], f"Payment Released - {job['title']}", html)
+
+async def notify_payment_funded(job: dict):
+    """Notify homeowner that escrow has been funded"""
+    homeowner = await db.users.find_one({"id": job["homeowner_id"]}, {"_id": 0})
+    if not homeowner:
+        return
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #0ea5e9;">Escrow Payment Confirmed!</h2>
+        <p>Hi {homeowner['full_name']},</p>
+        <p>Your escrow payment for <strong>{job['title']}</strong> has been successfully processed.</p>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p><strong>Job:</strong> {job['title']}</p>
+            <p><strong>Amount in Escrow:</strong> ${job.get('escrow_amount', 0):,.2f} CAD</p>
+            <p><strong>Status:</strong> Ready to award to a contractor</p>
+        </div>
+        <p>You can now review bids and accept the best one. The funds will be held securely until you confirm job completion.</p>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">
+            Build Launch - Renovation Marketplace<br>
+            Phone: 416-697-1728
+        </p>
+    </div>
+    """
+    await send_email_notification(homeowner['email'], f"Escrow Payment Confirmed - {job['title']}", html)
+
 # ============= Auth Endpoints =============
 
 @api_router.post("/auth/register")
