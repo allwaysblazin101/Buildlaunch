@@ -16,6 +16,7 @@ from collections import defaultdict
 import jwt
 import bcrypt
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+import resend
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -37,6 +38,11 @@ PLATFORM_FEE_PERCENT = 10
 # Admin Config
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@buildlaunch.ca')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'BuildLaunch2024!')
+
+# Resend Email Config
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
 
 # Rate Limiting (in-memory for simplicity)
 login_attempts = defaultdict(list)
