@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class BuildLaunchAPITester:
-    def __init__(self, base_url="https://renojob-connect.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://homefixpro-5.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.homeowner_token = None
         self.contractor_token = None
@@ -274,7 +274,7 @@ class BuildLaunchAPITester:
         if self.homeowner_token and self.test_job_id:
             payment_data = {
                 "job_id": self.test_job_id,
-                "origin_url": "https://renojob-connect.preview.emergentagent.com"
+                "origin_url": "https://homefixpro-5.preview.emergentagent.com"
             }
             
             success, response = self.run_test(
