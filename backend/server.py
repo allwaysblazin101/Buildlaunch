@@ -868,6 +868,9 @@ async def release_payment(release_req: PaymentReleaseRequest, user: dict = Depen
     }
     await db.payouts.insert_one(payout_doc)
     
+    # Send email notification to contractor about payment release
+    await notify_job_completed(job, contractor_payout)
+    
     return {
         "message": "Payment released",
         "escrow_amount": escrow_amount,
