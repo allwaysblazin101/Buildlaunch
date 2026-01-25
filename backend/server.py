@@ -821,6 +821,10 @@ async def check_payment_status(session_id: str, user: dict = Depends(get_current
                 {"id": transaction["job_id"]},
                 {"$set": {"status": "in_escrow", "escrow_amount": transaction["amount"]}}
             )
+            # Send email notification about escrow funding
+            updated_job = await db.jobs.find_one({"id": transaction["job_id"]}, {"_id": 0})
+            if updated_job:
+                await notify_payment_funded(updated_job)
             return {"status": "paid", "job_id": transaction["job_id"]}
         elif checkout_status.status == "expired":
             await db.payment_transactions.update_one(
