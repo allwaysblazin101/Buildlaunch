@@ -679,6 +679,10 @@ async def create_bid(job_id: str, bid_data: BidCreate, user: dict = Depends(get_
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.bids.insert_one(bid_doc)
+    
+    # Send email notification to homeowner
+    await notify_new_bid(job, bid_doc, user["full_name"])
+    
     return {"id": bid_id, "message": "Bid submitted successfully"}
 
 @api_router.get("/jobs/{job_id}/bids")
@@ -733,6 +737,9 @@ async def accept_bid(bid_id: str, user: dict = Depends(get_current_user)):
     await db.bids.update_one({"id": bid_id}, {"$set": {"status": "accepted"}})
     await db.bids.update_many({"job_id": bid["job_id"], "id": {"$ne": bid_id}}, {"$set": {"status": "rejected"}})
     await db.jobs.update_one({"id": bid["job_id"]}, {"$set": {"status": "awarded", "awarded_contractor_id": bid["contractor_id"]}})
+    
+    # Send email notification to contractor
+    await notify_bid_accepted(bid, job)
     
     return {"message": "Bid accepted, job awarded"}
 
