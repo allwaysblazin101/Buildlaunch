@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Copy frontend source
 COPY frontend/package*.json ./
-COPY frontend/ ./
+COPY frontend/./
 
 # Install dependencies and build
 RUN npm ci --unsafe-perm || npm install
